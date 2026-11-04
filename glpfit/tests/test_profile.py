@@ -76,8 +76,12 @@ def test_injection_day_counts_from_js_weekday():
 
 def test_personal_instructions_include_profile_memory_and_tone():
     text = personal_instructions(context(), today=TODAY)
-    for expected in ("민지님", "82.0kg → 목표 70.0kg", "마운자로", "기름진 음식", "핵심만"):
+    for expected in ("민지님", "82.0kg → 목표 70.0kg", "핵심만"):
         assert expected in text
+    full = build_instructions(None, context(), "en")
+    for section in ("# SOUL", "# AGENTS", "# TODAY\nReply in English", "# USER", "# MEMORY"):
+        assert section in full
+    assert "- 기름진 음식 먹으면 메스꺼움" in full
     assert "get_progress" in text
     assert personal_instructions(None) == ""
 

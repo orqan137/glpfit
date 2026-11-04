@@ -3869,6 +3869,174 @@ textarea:read-only {
   color: var(--label);
 }
 
+/* ───────── v5: 홈 네 장, 같은 모양 ───────── */
+.core-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.core-card {
+  --tone: var(--accent);
+  --tone-tint: var(--accent-tint);
+  --tone-ink: var(--accent-text);
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.core-weight {
+  --tone: var(--cat-sound);
+  --tone-tint: var(--cat-sound-tint);
+  --tone-ink: var(--cat-sound-ink);
+}
+.core-meals {
+  --tone: var(--cat-food);
+  --tone-tint: var(--cat-food-tint);
+  --tone-ink: var(--cat-food-ink);
+}
+.core-move {
+  --tone: var(--cat-motion);
+  --tone-tint: var(--cat-motion-tint);
+  --tone-ink: var(--cat-motion-ink);
+}
+.core-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin-bottom: 2px;
+  background: transparent;
+  color: var(--label-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+.core-head:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.core-head:active:not(:disabled) {
+  transform: none;
+}
+.core-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--tone);
+  background: var(--tone-tint);
+}
+.core-chevron {
+  margin-left: auto;
+  color: var(--label-tertiary);
+}
+.core-main {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.core-main small {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--label-tertiary);
+}
+.core-input input {
+  width: 5.2ch;
+  border: 0;
+  border-bottom: 2px dashed var(--separator);
+  padding: 0;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  color: var(--label);
+}
+.core-input input:focus {
+  border-bottom-color: var(--tone);
+}
+.core-input input::placeholder {
+  color: var(--label-tertiary);
+}
+.core-sub {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tone-ink);
+  word-break: keep-all;
+}
+.core-cta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.core-tip {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--label-secondary);
+  word-break: keep-all;
+}
+.core-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--tone-tint);
+  overflow: hidden;
+  margin: 4px 0 2px;
+}
+.core-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--tone);
+  transition: width 0.7s var(--spring);
+}
+.core-spark {
+  width: 100%;
+  height: 36px;
+  margin-top: 4px;
+}
+.core-spark path {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+/* The level curve on a white card */
+.core-dose .level-curve {
+  height: 72px;
+  margin: 4px 0;
+}
+.core-dose .level-area {
+  fill: var(--accent-tint);
+}
+.core-dose .level-line {
+  stroke: var(--accent);
+}
+.core-dose .level-shot,
+.core-dose .level-today {
+  stroke: var(--separator);
+}
+.core-dose .level-shot-dot {
+  fill: var(--accent);
+}
+.core-dose .level-next {
+  stroke: var(--accent);
+}
+.core-dose .level-now {
+  fill: var(--accent);
+  stroke: var(--accent-tint);
+}
+
 /* 다크 모드 */
 @media (prefers-color-scheme: dark) {
   :root {

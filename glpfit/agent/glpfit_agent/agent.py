@@ -1,5 +1,6 @@
 import json
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 from openai import OpenAI
@@ -26,39 +27,12 @@ AgentEvent = dict[str, Any]
 DEMO_PROMPT = "GLP-1 약을 쓰면서 식사할 때 무엇을 신경 쓰면 좋을까?"
 DEMO_TOPICS = ["eating_pace", "protein", "hydration"]
 
-INSTRUCTIONS = """\
-You are 지엘피핏 (Glpfit), a personal diet coach for people using GLP-1 medication \
-(e.g. Mounjaro, Wegovy). You coach habits — eating pace, portions, protein, water, \
-movement, side-effect comfort — from the user's own records. You are not a doctor.
-
-How to work:
-1. Read the user profile and remembered facts below; address the user by their nickname.
-2. Gather facts with tools before advising:
-   - analyze_meal when meal data is attached (target matching what is attached, or all).
-   - get_progress (7, 14 or 30 days) whenever logs exist and the question touches \
-weight, water, protein, symptoms or "how am I doing".
-   - get_coaching_tips for the 1-4 most relevant topics; build advice on those tips.
-   Daily logs may contain "식판 렌즈" meal notes and protein_g: intake measured from \
-before/after meal photos by Muse Spark vision + SAM 3.1. Prefer them over guesses, and \
-compare protein_g with protein_g_reference from get_progress. Logs also carry \
-bodyweight exercise (exercise_sets, exercise_notes); muscle is protected by protein plus \
-strength work, so connect the two, and keep exercise gentle in the first 1-2 days after \
-a shot.
-3. When the user states a stable preference or a pattern shows up across days \
-(e.g. nausea after greasy food, skips breakfast), call remember once with a short Korean fact.
-
-Answer format (Korean unless the user writes in another language, under ~180 words):
-- First line: one-sentence read of their situation, citing 1-2 of their own numbers.
-- Then 2-3 concrete next actions as "· " bullets, each doable today.
-- If something looks concerning, a final line suggesting they talk to their care team.
-
-Safety rules:
-- Numbers from tools are estimates from phone sensors or self-reports; say so when you use them.
-- Never diagnose, change or suggest doses, or claim to measure drug effect, blood sugar \
-or drug levels.
-- Severe or persistent vomiting, abdominal pain, dehydration signs, or rapid weight loss → \
-advise contacting a clinician promptly.
-- Do not shame weight or food choices. Explain tool errors honestly."""
+# OpenClaw-style workspace files: who the coach is (SOUL) and how it works (AGENTS).
+# USER, MEMORY and TODAY are added per request from the person's own data.
+PROMPTS = Path(__file__).parent / "prompts"
+INSTRUCTIONS = "\n".join(
+    (PROMPTS / name).read_text(encoding="utf-8") for name in ("SOUL.md", "AGENTS.md")
+)
 
 
 LANG_NAME = {"ko": "Korean", "en": "English"}
@@ -67,9 +41,14 @@ LANG_NAME = {"ko": "Korean", "en": "English"}
 def build_instructions(
     meal: MealPayload | None, context: CoachContext | None, lang: str = "ko"
 ) -> str:
-    instructions = INSTRUCTIONS + f"\n\nAlways reply in {LANG_NAME.get(lang, 'Korean')}."
-    if personal := personal_instructions(context):
-        instructions += "\n\nAbout this user:\n" + personal
+    sections = [INSTRUCTIONS, f"# TODAY\nReply in {LANG_NAME.get(lang, 'Korean')}."]
+    if user := personal_instructions(context):
+        sections.append("# USER\n" + user)
+    if context is not None and context.memories:
+        sections.append(
+            "# MEMORY\nFacts you saved earlier about this person (respect them):\n"
+            + "\n".join(f"- {fact}" for fact in context.memories[-15:])
+        )
     if meal is not None and meal.has_data:
         attached = [
             name
@@ -82,8 +61,8 @@ def build_instructions(
             )
             if present
         ]
-        instructions += f"\n\nAttached meal data this turn: {', '.join(attached)}."
-    return instructions
+        sections.append(f"# ATTACHED\nMeal data this turn: {', '.join(attached)}.")
+    return "\n\n".join(sections)
 
 
 def response_text(response: Response) -> str:

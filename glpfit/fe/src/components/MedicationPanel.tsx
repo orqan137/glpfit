@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, Syringe, X } from "lucide-react";
+import { AlertTriangle, Check, FileText, Syringe, X } from "lucide-react";
 import { useTr } from "../i18n";
 import {
   DRUG_INFO,
@@ -13,10 +13,13 @@ import {
   type Site,
 } from "../medication";
 import {
+  SYMPTOM_LABEL,
+  SYMPTOM_LABEL_EN,
   WEEKDAY_LABEL,
   WEEKDAY_LABEL_EN,
   dayKey,
   type Profile,
+  type Symptom,
 } from "../profile";
 
 type MedicationPanelProps = {
@@ -26,6 +29,9 @@ type MedicationPanelProps = {
   onProfileChange: (patch: Partial<Profile>) => void;
   onLog: (shot: Omit<Injection, "id">) => void;
   onDelete: (id: string) => void;
+  symptoms: Symptom[];
+  onSymptoms: (symptoms: Symptom[]) => void;
+  onReport: () => void;
 };
 
 export function MedicationPanel({
@@ -35,6 +41,9 @@ export function MedicationPanel({
   onProfileChange,
   onLog,
   onDelete,
+  symptoms,
+  onSymptoms,
+  onReport,
 }: MedicationPanelProps) {
   const { lang, tr } = useTr();
   const drug = profile.drug;
@@ -201,6 +210,54 @@ export function MedicationPanel({
           </button>
         )}
       </div>
+
+      <div className="card form-card">
+        <div className="form-field">
+          <span>{tr("오늘 불편한 점", "Side effects today")}</span>
+          <div className="chip-row">
+            {(Object.keys(SYMPTOM_LABEL) as Symptom[]).map((symptom) => (
+              <button
+                key={symptom}
+                type="button"
+                className={`chip${symptoms.includes(symptom) ? " on" : ""}`}
+                aria-pressed={symptoms.includes(symptom)}
+                onClick={() =>
+                  onSymptoms(
+                    symptoms.includes(symptom)
+                      ? symptoms.filter((s) => s !== symptom)
+                      : [...symptoms, symptom],
+                  )
+                }
+              >
+                {(lang === "ko" ? SYMPTOM_LABEL : SYMPTOM_LABEL_EN)[symptom]}
+              </button>
+            ))}
+          </div>
+          <p className="field-hint">
+            {tr(
+              "주사 후 며칠째에 불편했는지 모여서 병원 리포트에 표로 나와요.",
+              "These add up into a by-day-after-shot table in your clinic report.",
+            )}
+          </p>
+        </div>
+      </div>
+
+      <button className="card pdf-row" onClick={onReport}>
+        <span className="data-icon">
+          <FileText size={18} />
+        </span>
+        <span className="sample-text">
+          <strong>
+            {tr("병원 갈 때 기록 PDF", "PDF for your clinic visit")}
+          </strong>
+          <span>
+            {tr(
+              "최근 30일 체중, 투약, 식사, 운동, 부작용",
+              "Last 30 days: weight, shots, meals, exercise, side effects",
+            )}
+          </span>
+        </span>
+      </button>
 
       <div className="card form-card">
         <div className="form-field">

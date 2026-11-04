@@ -23,7 +23,7 @@ const PAST = 14;
 const FUTURE = 7;
 
 /** Estimated relative drug level: past solid, projection dashed, today marked. */
-function LevelCurve({
+export function LevelCurve({
   shots,
   drug,
   nextIn,

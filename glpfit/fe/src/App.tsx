@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Camera,
-  ChevronRight,
   Dumbbell,
-  FileText,
   Home,
   MessageCircle,
   RefreshCw,
@@ -13,18 +10,17 @@ import {
   X,
 } from "lucide-react";
 import type { Health } from "./api";
-import { CheckinCard } from "./components/CheckinCard";
 import { ClinicReport } from "./components/ClinicReport";
 import { CoachChat } from "./components/CoachChat";
-import { CycleCard } from "./components/CycleCard";
 import { DataPanel } from "./components/DataPanel";
+import { HomeView } from "./components/HomeView";
 import { ExercisePanel } from "./components/ExercisePanel";
 import { Logo } from "./components/Logo";
-import { MealsPanel, ProteinBar } from "./components/MealsPanel";
+import { MealsPanel } from "./components/MealsPanel";
 import { MedicationPanel } from "./components/MedicationPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
-import { WeightChart } from "./components/WeightChart";
 import {
+  MOVES,
   ROUTINES,
   clearExercise,
   loadExercise,
@@ -58,7 +54,6 @@ import {
   buildContext,
   clearPersonalData,
   dayKey,
-  hasProfile,
   loadLogs,
   loadMemories,
   loadProfile,
@@ -212,126 +207,32 @@ export default function App() {
                     {profile?.nickname
                       ? tr(
                           `${profile.nickname}님, 오늘도 가볍게`,
-                          `Hi ${profile.nickname}, keep it light today`,
+                          `Hi ${profile.nickname}`,
                         )
-                      : tr("오늘의 요약", "Today")}
+                      : tr("오늘", "Today")}
                   </h1>
                 </div>
-
-                <CheckinCard
-                  date={today}
-                  log={logs.find((log) => log.date === today)}
+                <HomeView
+                  profile={profile}
                   weight={weight}
-                  voiceEnabled={live}
-                  onChange={(patch) => setLogs(upsertLog(today, patch))}
-                  onInjectionMentioned={() => go("dose")}
-                />
-
-                <CycleCard
+                  todayWeight={
+                    logs.find((log) => log.date === today)?.weightKg ?? null
+                  }
                   schedule={schedule}
                   shots={shots}
-                  drug={profile?.drug ?? null}
-                  onOpen={() => go("dose")}
+                  protein={intake.proteinG}
+                  proteinGoal={goal}
+                  meals={intake.meals}
+                  sets={setsToday}
+                  routineSets={routineSets}
+                  routineName={`${phase?.name ?? tr("오늘", "Today")}: ${routine.items
+                    .map((item) =>
+                      lang === "ko" ? MOVES[item.move].ko : MOVES[item.move].en,
+                    )
+                    .join(", ")}`}
+                  onWeight={(kg) => setLogs(upsertLog(today, { weightKg: kg }))}
+                  onOpen={go}
                 />
-
-                <div className="core-pair">
-                  <button
-                    className="card protein-card"
-                    onClick={() => go("meals")}
-                  >
-                    <ProteinBar
-                      protein={intake.proteinG}
-                      goal={goal}
-                      provisional={false}
-                    />
-                    <span className="protein-cta">
-                      <Camera size={16} />
-                      {intake.meals
-                        ? tr(
-                            `${intake.meals}끼, 사진 추가`,
-                            `${intake.meals} meals, add photo`,
-                          )
-                        : tr("식사 사진 찍기", "Snap a meal")}
-                    </span>
-                  </button>
-                  <button
-                    className="card move-card"
-                    onClick={() => go("exercise")}
-                  >
-                    <span className="move-top">
-                      <span>{tr("맨몸운동", "Bodyweight")}</span>
-                      <strong>
-                        {Math.min(setsToday, routineSets)}
-                        <small>/ {routineSets}</small>
-                      </strong>
-                    </span>
-                    <span
-                      className="move-track"
-                      role="img"
-                      aria-label={`${setsToday}/${routineSets}`}
-                    >
-                      <span
-                        style={{
-                          width: `${Math.min(100, (setsToday / routineSets) * 100)}%`,
-                        }}
-                      />
-                    </span>
-                    <span className="move-cta">
-                      <Dumbbell size={16} />
-                      {setsToday
-                        ? tr("이어서 하기", "Keep going")
-                        : tr("오늘 루틴 보기", "Today's routine")}
-                    </span>
-                  </button>
-                </div>
-
-                <WeightChart
-                  profile={profile}
-                  logs={logs}
-                  shots={shots}
-                  tr={tr}
-                />
-
-                <button
-                  className="card pdf-row"
-                  onClick={() => setReportOpen(true)}
-                >
-                  <span className="data-icon">
-                    <FileText size={18} />
-                  </span>
-                  <span className="sample-text">
-                    <strong>
-                      {tr("병원 갈 때 기록 PDF", "PDF for your clinic visit")}
-                    </strong>
-                    <span>
-                      {tr(
-                        "최근 30일 체중, 투약, 식사, 운동을 한 장으로",
-                        "Last 30 days of weight, shots, meals and exercise on one page",
-                      )}
-                    </span>
-                  </span>
-                  <ChevronRight size={18} className="track-chevron" />
-                </button>
-
-                {!hasProfile(profile) && (
-                  <button className="card setup-card" onClick={() => go("me")}>
-                    <span className="sample-text">
-                      <strong>
-                        {tr(
-                          "나에게 맞춘 코칭 받기",
-                          "Get coaching made for you",
-                        )}
-                      </strong>
-                      <span>
-                        {tr(
-                          "목표 체중과 걱정, 말투를 알려 주세요",
-                          "Tell us your goal, worries and preferred tone",
-                        )}
-                      </span>
-                    </span>
-                    <ChevronRight size={18} className="track-chevron" />
-                  </button>
-                )}
               </section>
             )}
 
@@ -376,6 +277,13 @@ export default function App() {
                 onProfileChange={updateProfile}
                 onLog={(shot) => setShots(addInjection(shot))}
                 onDelete={(id) => setShots(deleteInjection(id))}
+                symptoms={
+                  logs.find((log) => log.date === today)?.symptoms ?? []
+                }
+                onSymptoms={(symptoms) =>
+                  setLogs(upsertLog(today, { symptoms }))
+                }
+                onReport={() => setReportOpen(true)}
               />
             )}
 

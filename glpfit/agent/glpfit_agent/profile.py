@@ -229,16 +229,11 @@ def personal_instructions(ctx: CoachContext | None, today: date | None = None) -
         lines.append(f"Tone: {TONE_TEXT[profile.tone]}.")
     if line := cycle_line(ctx, today):
         lines.append(line)
-    if ctx.memories:
-        lines.append(
-            "Things you remembered about this user (respect them): "
-            + " | ".join(ctx.memories[-15:])
-        )
     if ctx.logs:
         lines.append(
             f"The user has {len(ctx.logs)} days of logs. Call get_progress before commenting on "
             "weight, water, protein or symptom trends."
         )
     else:
-        lines.append("No daily logs yet: encourage a first check-in (weight, water, symptoms).")
+        lines.append("No daily logs yet: encourage logging weight, the shot and a meal photo.")
     return " ".join(lines)
