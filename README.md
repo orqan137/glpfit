@@ -4,6 +4,8 @@
 
 <h1 align="center">GLPfit</h1>
 
+<p align="center"><b>English</b> · <a href="README.ko.md">한국어</a></p>
+
 <p align="center">
   <b>The weekly-shot companion for Mounjaro and Wegovy users.</b><br/>
   Weight, shots, photo-logged meals and exercise, coached by Meta AI around your injection cycle.
@@ -137,9 +139,4 @@ Issues and pull requests are welcome. Please keep health guidance conservative (
 
 ---
 
-<details>
-<summary>한국어 소개</summary>
-
-마운자로와 위고비는 주 1회 주사라서 주사 후 며칠째냐에 따라 식욕과 부작용이 달라집니다. 지엘피핏은 체중, 투약, 식사(사진), 운동 네 가지만 기록하고, Meta AI 코치가 주사 주기에 맞춰 오늘 할 일을 알려 줍니다. 식사는 사진만 찍으면 SAM 3.1과 Muse Spark가 음식과 단백질을 자동으로 기록하고, 운동은 기본 루틴에 내 운동을 직접 추가할 수 있습니다. 한 달에 한 번 병원에 갈 때 볼 기록을 PDF로 뽑을 수 있고, 한국어와 영어를 지원합니다.
-
-</details>
+[한국어 문서 읽기 →](README.ko.md)
