@@ -25,7 +25,7 @@
 
 ## Demo video
 
-[Watch or download the 2-minute 48-second English demo](https://github.com/orqan137/glpfit/raw/refs/heads/main/glpfit-demo-final.mp4). The edited walkthrough includes English narration and feature explanations. [English captions](glpfit-demo-final.en.srt) are also included. Waiting time is shortened; all app footage comes from a recorded session with a demo persona.
+[Watch the 2-minute 48-second English demo on YouTube](https://youtu.be/DEE4_cbdePg). The edited walkthrough includes English narration, feature explanations and English captions. [Download the video](https://github.com/orqan137/glpfit/raw/refs/heads/main/glpfit-demo-final.mp4) or [English captions](glpfit-demo-final.en.srt). Waiting time is shortened; all app footage comes from a recorded session with a demo persona.
 
 ## Why
 

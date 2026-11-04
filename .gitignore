@@ -13,6 +13,7 @@ build/
 .coverage
 htmlcov/
 outputs/
+output/
 node_modules/
 *.tsbuildinfo
 trash/
