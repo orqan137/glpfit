@@ -183,3 +183,9 @@ def test_multimodal_endpoints_need_key_and_valid_input():
             assert client.post("/api/voice-checkin", content=b"not a wav").status_code == 422
     finally:
         app.dependency_overrides.clear()
+
+
+def test_missed_detection_falls_back_to_vision():
+    quinoa = item(name_ko="quinoa", countable=False, left_pct=55)
+    box = {"x1": 0, "y1": 0, "x2": 9, "y2": 9, "w": 100, "h": 100, "c": 1}
+    assert combine(quinoa, [box], [])["left_pct"] == 55

@@ -25,7 +25,7 @@ VISION_PROMPT = """\
 You are a dietitian's vision assistant. The first image is a meal BEFORE eating{after}.
 List up to 6 distinct foods (ignore plates, cutlery, table).
 For each food give:
-- name_ko: short food name in {language} (e.g. 닭가슴살 / chicken breast)
+- name_ko: short food name, written only in {language} (e.g. {example})
 - sam_prompt: a short English noun phrase naming ONE visible piece/region of it, used to \
 segment it (e.g. "chicken slice", "rice", "broccoli floret", "fried egg", "kimchi")
 - countable: true if it is served as separate pieces worth counting (slices, florets, \
@@ -121,6 +121,7 @@ def identify(
             "text": VISION_PROMPT.format(
                 after=" and the second image is the same plate AFTER eating" if after_url else "",
                 language="English" if lang == "en" else "Korean",
+                example="chicken breast, white rice" if lang == "en" else "닭가슴살, 흰쌀밥",
             ),
         },
         {"type": "input_image", "image_url": before_url},
@@ -148,19 +149,24 @@ def identify(
 
 
 def geometric_left(item: VisionItem, before: list[dict], after: list[dict]) -> float | None:
-    """Share of the food left, from SAM alone: instance count or total box area."""
+    """Share of the food left, from SAM alone: instance count or main-portion area."""
     if not before:
         return None
     if item.countable and len(before) >= 2:
         return min(1.0, len(after) / len(before))
-    area_before = sum(box_area(box) for box in before)
-    return min(1.0, sum(box_area(box) for box in after) / area_before) if area_before else None
+    # Heaps scatter into crumbs after eating; compare the main portion, not every crumb.
+    biggest_before = max(box_area(box) for box in before)
+    biggest_after = max((box_area(box) for box in after), default=0.0)
+    return min(1.0, biggest_after / biggest_before) if biggest_before else None
 
 
 def combine(item: VisionItem, before: list[dict], after: list[dict] | None) -> dict:
     vision_left = item.left_pct / 100
     sam_left = geometric_left(item, before, after) if after is not None else None
-    # Average the two views when SAM saw the food; fall back to vision otherwise.
+    # SAM finding nothing while vision sees a real portion is a missed detection, not an
+    # empty plate: trust vision there. Otherwise average the two views.
+    if sam_left == 0 and vision_left >= 0.3:
+        sam_left = None
     left = vision_left if sam_left is None else (vision_left + sam_left) / 2
     eaten = 1 - left if after is not None else None
     return {

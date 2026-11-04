@@ -2,87 +2,138 @@
   <img src="glpfit/fe/public/icon.svg" width="88" alt="GLPfit logo" />
 </p>
 
-<h1 align="center">GLPfit 지엘피핏</h1>
-<p align="center"><b>A weekly-shot companion for Mounjaro and Wegovy users.<br/>Weight, shots, meals and bodyweight exercise, coached by Meta AI around your injection cycle.</b></p>
+<h1 align="center">GLPfit</h1>
 
-> Meta Global AI Developer Hackathon · Build for Your World
+<p align="center">
+  <b>The weekly-shot companion for Mounjaro and Wegovy users.</b><br/>
+  Weight, shots, photo-logged meals and exercise, coached by Meta AI around your injection cycle.
+</p>
 
-## The problem
+<p align="center">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" />
+  <img alt="Meta Model API" src="https://img.shields.io/badge/Meta-Muse%20Spark%2C%20SAM%203.1-0866ff" />
+  <img alt="Languages" src="https://img.shields.io/badge/UI-English%20%7C%20%ED%95%9C%EA%B5%AD%EC%96%B4-555" />
+</p>
 
-Mounjaro (tirzepatide, a dual GIP/GLP-1 agonist) and Wegovy (semaglutide, a GLP-1 agonist) are **once-a-week shots**. Most users feel the week: appetite is lowest and nausea is common in the first days after the shot, and appetite returns before the next one. Weight drops fast, and **muscle goes with it** unless people eat enough protein and do some strength work.
+<p align="center">
+  <img src="glpfit/fe/public/samples/plate-en-before.webp" width="260" alt="Meal before eating" />
+  <img src="glpfit/fe/public/samples/plate-en-after.webp" width="260" alt="Same meal after eating" />
+  <br/><sub>Plate Lens compares a before and an after photo to measure how much protein was actually eaten.</sub>
+</p>
 
-Diet apps treat every day the same and make you type in your food. GLPfit is built around one question: **what day after the shot is it, and what should I do today?**
+---
 
-## What it does
+## Why
 
-Four core things, everything else is secondary.
+Mounjaro (tirzepatide, dual GIP/GLP-1) and Wegovy (semaglutide, GLP-1) are **once-a-week shots**, and people feel the week: appetite is lowest and nausea is common right after the shot, then appetite comes back before the next one. Weight drops fast, and **muscle goes with it** unless people get enough protein and do some strength work.
 
-| Core | How |
+Most diet apps treat every day the same and make you type in food. GLPfit asks one question every day: **what day after the shot is it, and what should I do today?**
+
+## Features
+
+| | |
 | --- | --- |
-| **Weight** | One number a day (or say it out loud). A trend chart marks every shot and dose step. |
-| **Shots** | Log Mounjaro/Wegovy doses. See days since the shot, the next due date, a site to rotate to, the label's dose ladder, and an **estimated relative drug-level curve** from the label half-life. |
-| **Meals** | **Just take a photo.** Plate Lens finds every food, estimates protein and calories, and with an after photo measures how much you actually ate. Daily protein fills itself in. |
-| **Bodyweight exercise** | A 3-move routine that follows the cycle: gentle right after the shot, strength on steady days, legs when appetite returns. Tap sets as you go. |
-| **Coach agent** | A chat coach that reads all of the above with tools, adapts to the cycle phase and remembers your patterns. |
-
-Secondary indicators (water, how you feel) fold away. A one-tap **clinician PDF** summarizes the last 30 days for the monthly visit.
+| **Home** | Four cards with the same shape: weight, shot cycle, protein today, exercise sets. |
+| **Shots** | Log Mounjaro / Wegovy doses. Days since the shot, next due date, site rotation, missed-dose rule from the label, today's side effects, and one chart: an **estimated relative drug-level curve** (from the label half-life) with each dose marked. |
+| **Meals** | **Just take a photo.** Plate Lens finds every food, estimates protein and calories, and with an after photo measures what was actually eaten. Daily protein fills itself in. |
+| **Exercise** | A bodyweight routine that follows the cycle (gentle right after the shot, strength on steady days, legs when appetite returns), plus **your own exercises** with reps and sets. |
+| **Coach** | A chat agent that reads all of the above through tools, adapts to the cycle phase and remembers your patterns. Korean and English. |
+| **Clinic PDF** | One tap turns the last 30 days into a one-page report for your monthly visit: dose history, side effects by day after the shot, measured protein, questions to ask. |
 
 ## How it uses Meta AI
 
-| Meta model | Where | Beyond a basic call |
-| --- | --- | --- |
-| **SAM 3.1** | Plate Lens | Segmentation as a **measuring tool**: it counts and sizes every piece of each food in the before and after photos (e.g. chicken slices 9 → 3) to measure what was eaten. |
-| **Muse Spark (vision + structured output)** | Plate Lens | Names foods and estimates protein, kcal and how much is left under a strict JSON schema. Its estimate and SAM's geometry **cross-check each other**. |
-| **Muse Spark (agent)** | Coach | Picks tools on its own: `get_progress` (server-computed trends, so the model never does arithmetic), `get_medication_schedule`, `get_coaching_tips`, `remember` (persistent memory). Multi-turn chat in Korean or English. |
-| **Muse Voice Transcribe + structured output** | Voice check-in | "79.2 kilos, four glasses of water, a bit nauseous" becomes a structured daily log. Hands-free when you feel queasy. |
-| **Muse Spark (structured output)** | Clinician report | Computed facts (dose history, symptoms by day after the shot, measured protein) become a one-page report with questions to ask. |
-| **Muse Image** | Demo data | Generated and edited the matching before/after meal photos used in the demo. |
+| Meta model | Used for |
+| --- | --- |
+| **SAM 3.1** | Plate Lens. Segmentation as a measuring tool: it counts and sizes each food in the before and after photos (e.g. 10 chicken slices → 3) to estimate what was eaten. |
+| **Muse Spark** (vision, structured output) | Plate Lens. Names foods and estimates protein, kcal and leftovers under a strict JSON schema; its estimate and SAM's geometry cross-check each other. |
+| **Muse Spark** (agent) | The coach. Calls our tools on its own and keeps multi-turn context. |
+| **Muse Spark** (structured output) | The clinician report, written from server-computed facts. |
+| **Muse Voice Transcribe** | Voice check-in API (`/api/voice-checkin`): speech → structured daily log. |
+| **Muse Image** | Generated and edited the before/after sample photos in this repo. |
 
-## Where the data goes next
+### The coach agent
 
-No community features. The records themselves become valuable, step by step:
+The coach follows the workspace-file pattern of agents like OpenClaw and Hermes:
 
-1. **You**: your data is yours. Export everything as JSON; print the clinician PDF.
-2. **Your clinic**: a standardized monthly report (dose history, symptoms by cycle day, measured protein) to support dose decisions made by the prescriber.
-3. **Research and pharma (opt-in)**: a de-identified dataset (`glpfit.rwd.v1`: relative days, drug and dose, weight change %, protein, symptom codes; no names, notes, dates or actual weight). Pooled, it becomes real-world evidence such as *which days after a shot side effects cluster* and *protein intake by dose step*.
+- [`prompts/SOUL.md`](glpfit/agent/glpfit_agent/prompts/SOUL.md): who the coach is and what it cares about, safety first.
+- [`prompts/AGENTS.md`](glpfit/agent/glpfit_agent/prompts/AGENTS.md): how it works each turn, which tools to call, answer format.
+- Built per request: `TODAY` (language), `USER` (profile and where they are in the shot cycle) and `MEMORY` (facts the coach saved earlier).
+
+Tools: `get_progress` (trends computed on the server, so the model never does arithmetic), `get_medication_schedule`, `get_coaching_tips`, `analyze_meal`, and `remember`, which writes durable facts ("greasy food makes me nauseous") back into the person's memory.
 
 ## Safety
 
-- No diagnosis, no prescribing, never suggests a dose change. Dose steps are label reference only.
-- The drug-level curve is a model from the label half-life, clearly marked as **not a measured blood level**.
+- No diagnosis, no prescribing, never suggests a dose change. Dose steps are shown as label reference only.
+- The drug-level curve is a model from the label half-life and is labeled **not a measured blood level**.
 - Every number is labeled as a self-log or photo estimate. Severe symptoms → contact a clinician.
-- Data lives in the browser and goes to the server only when you ask for coaching (`store=False` on Meta calls).
+- Data stays in the browser and is sent to the server only when you ask for coaching. Meta calls use `store=False`.
 
-## Run it
+## Your data, then research (opt-in)
 
-Requires Node.js 24+ and [uv](https://docs.astral.sh/uv/).
+1. **Yours**: export everything as JSON, print the clinician PDF.
+2. **Your clinic**: a standardized monthly report to support decisions your prescriber makes.
+3. **Research**: with explicit consent, a de-identified dataset (`glpfit.rwd.v1`: relative days, drug and dose, weight change %, protein, symptom codes; no names, notes, dates or actual weight) that could become real-world evidence, such as which days after a shot side effects cluster.
+
+## Getting started
+
+Requirements: Node.js 24+, [uv](https://docs.astral.sh/uv/), a Meta Model API key from [dev.meta.ai](https://dev.meta.ai/).
 
 ```bash
-cd glpfit
+git clone https://github.com/orqan137/glpfit.git
+cd glpfit/glpfit
 uv sync --locked
 npm install --no-package-lock
-cp .env.example .env    # put your Meta key in MODEL_API_KEY (or META_API_KEY in env.txt)
-npm run dev             # web http://127.0.0.1:5173, API docs /api/docs
+cp .env.example .env        # then set MODEL_API_KEY=...
+npm run dev                 # app: http://127.0.0.1:5173   API docs: /api/docs
 ```
 
-On Windows PowerShell you can run `.\scripts\setup.ps1` instead of the first three steps.
+On Windows PowerShell, `.\scripts\setup.ps1` does the install steps.
 
-Without a key, the app runs in **sample mode**: shots, weight, exercise and the clinician fact table work, and the Plate Lens sample shows a real result computed earlier. Your own photos, voice, the live coach and the written report need a key.
+**No key?** The app still runs in sample mode: shots, weight, exercise, the clinician fact table and both Plate Lens samples (with results computed earlier) work offline. Your own photos, the live coach and the written report need a key.
 
-## Code map
+> Keys are read on the server only, from `.env` (`MODEL_API_KEY`) or `env.txt` (`META_API_KEY`). Both are git-ignored. Never put a key in frontend code or `VITE_*` variables.
 
-- `glpfit/fe/` React + TypeScript + Vite mobile web app (PWA). Tabs: Home, Shots, Meals, Move, Coach; Me behind the top icon.
-  - `medication.ts` shots, cycle, site rotation, dose ladder, drug-level curve · `meals.ts` photo meals and protein · `exercise.ts` cycle-aware routines · `profile.ts` profile, logs, coach context · `dataExport.ts` export and de-identification · `i18n.ts` Korean/English
-- `glpfit/agent/glpfit_agent/` coach prompt and tool loop (`agent.py`), tools (`tools.py`), trends (`profile.py`), cycle phases (`medication.py`), Plate Lens (`plate.py`), voice (`voice.py`), clinician report (`report.py`)
-- `glpfit/be/glpfit_be/api.py` FastAPI: `/api/runs` (SSE coach), `/api/plate`, `/api/voice-checkin`, `/api/report`, `/api/health`
-- Tests: `glpfit/tests/` (51, Meta responses mocked) and `glpfit/fe/src/*.test.ts` (27)
+## Project layout
+
+```
+glpfit/
+├─ agent/glpfit_agent/
+│  ├─ prompts/        SOUL.md, AGENTS.md
+│  ├─ agent.py        coach loop, prompt assembly, sample mode
+│  ├─ tools.py        tool schemas and execution
+│  ├─ profile.py      user context, trends, USER section
+│  ├─ medication.py   shot cycle phases, dose ladders, missed-dose rules
+│  ├─ plate.py        Plate Lens (Muse Spark vision + SAM 3.1)
+│  ├─ report.py       clinician report
+│  └─ voice.py        voice check-in
+├─ be/glpfit_be/api.py  FastAPI: /api/runs (SSE), /api/plate, /api/report, /api/voice-checkin
+├─ fe/                  React + TypeScript + Vite PWA
+└─ tests/               pytest, Meta responses mocked
+```
+
+## Development
 
 ```bash
 cd glpfit
-uv run --locked pytest && uv run --locked ruff check .
-npm test && npm run build
+uv run --locked pytest          # 52 tests
+uv run --locked ruff check .
+npm test                        # 27 tests
+npm run build
 ```
 
-## 한국어 요약
+## Contributing
 
-마운자로·위고비는 주 1회 주사라 주사 후 며칠째냐에 따라 식욕과 부작용이 달라집니다. 지엘피핏은 **체중, 투약, 식사(사진), 맨몸운동** 네 가지만 기록하고, Meta AI 코치가 주사 주기에 맞춰 오늘 할 일을 알려 줍니다. 식사는 사진만 찍으면 SAM 3.1과 Muse Spark가 음식과 단백질을 자동으로 기록하고, 한 달에 한 번 병원 갈 때 볼 기록을 PDF로 뽑을 수 있습니다. 물, 몸 상태 같은 보조지표는 접어 두었고, 한국어와 영어를 지원합니다.
+Issues and pull requests are welcome. Please keep health guidance conservative (see Safety), run the tests above, and never commit keys.
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+<details>
+<summary>한국어 소개</summary>
+
+마운자로와 위고비는 주 1회 주사라서 주사 후 며칠째냐에 따라 식욕과 부작용이 달라집니다. 지엘피핏은 체중, 투약, 식사(사진), 운동 네 가지만 기록하고, Meta AI 코치가 주사 주기에 맞춰 오늘 할 일을 알려 줍니다. 식사는 사진만 찍으면 SAM 3.1과 Muse Spark가 음식과 단백질을 자동으로 기록하고, 운동은 기본 루틴에 내 운동을 직접 추가할 수 있습니다. 한 달에 한 번 병원에 갈 때 볼 기록을 PDF로 뽑을 수 있고, 한국어와 영어를 지원합니다.
+
+</details>

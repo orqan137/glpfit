@@ -115,7 +115,22 @@ export const ROUTINES: { ko: string; en: string; items: RoutineItem[] }[] = [
   },
 ];
 
-export type ExerciseDay = { date: string; done: Partial<Record<Move, number>> };
+/** Keys are built-in move names or custom move ids; names keep custom moves readable. */
+export type ExerciseDay = {
+  date: string;
+  done: Partial<Record<string, number>>;
+  names?: Record<string, string>;
+};
+
+export type CustomMove = {
+  id: string;
+  name: string;
+  sets: number;
+  amount: number;
+  unit: MoveInfo["unit"];
+};
+
+const CUSTOM_KEY = "glpfit.custom-moves.v1";
 
 const KEY = "glpfit.exercise.v1";
 
@@ -142,14 +157,19 @@ export function loadExercise(store = defaultStore()): ExerciseDay[] {
 
 export function setSets(
   date: string,
-  move: Move,
+  move: string,
   sets: number,
+  name?: string,
   store = defaultStore(),
 ): ExerciseDay[] {
   const days = loadExercise(store);
   const current = days.find((d) => d.date === date) ?? { date, done: {} };
   const next = [
-    { date, done: { ...current.done, [move]: Math.max(0, sets) } },
+    {
+      date,
+      done: { ...current.done, [move]: Math.max(0, sets) },
+      names: name ? { ...current.names, [move]: name } : current.names,
+    },
     ...days.filter((d) => d.date !== date),
   ]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -173,7 +193,7 @@ export function clearExercise(store = defaultStore()) {
 export function setsOn(days: ExerciseDay[], date: string): number {
   const day = days.find((d) => d.date === date);
   return day
-    ? Object.values(day.done).reduce((sum, n) => sum + (n ?? 0), 0)
+    ? Object.values(day.done).reduce<number>((sum, n) => sum + (n ?? 0), 0)
     : 0;
 }
 
@@ -189,6 +209,66 @@ export function weekActivity(days: ExerciseDay[], now = Date.now()) {
 export function exerciseNote(day: ExerciseDay): string {
   return Object.entries(day.done)
     .filter(([, n]) => (n ?? 0) > 0)
-    .map(([move, n]) => `${MOVES[move as Move].ko} ${n}세트`)
+    .map(
+      ([move, n]) =>
+        `${MOVES[move as Move]?.ko ?? day.names?.[move] ?? move} ${n}세트`,
+    )
     .join(", ");
+}
+
+export function loadCustomMoves(store = defaultStore()): CustomMove[] {
+  try {
+    const parsed: unknown = JSON.parse(store?.getItem(CUSTOM_KEY) ?? "[]");
+    return Array.isArray(parsed)
+      ? (parsed as CustomMove[]).filter(
+          (m) => typeof m?.name === "string" && m.sets > 0,
+        )
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCustom(
+  moves: CustomMove[],
+  store: RunStore | null,
+): CustomMove[] {
+  try {
+    store?.setItem(CUSTOM_KEY, JSON.stringify(moves));
+  } catch {
+    // Keep in memory only.
+  }
+  return moves;
+}
+
+export function addCustomMove(
+  move: Omit<CustomMove, "id">,
+  store = defaultStore(),
+): CustomMove[] {
+  const clean: CustomMove = {
+    id: `custom-${Date.now()}`,
+    name: move.name.trim().slice(0, 30),
+    sets: Math.min(10, Math.max(1, Math.round(move.sets))),
+    amount: Math.min(999, Math.max(1, Math.round(move.amount))),
+    unit: move.unit,
+  };
+  return writeCustom([...loadCustomMoves(store), clean].slice(-12), store);
+}
+
+export function removeCustomMove(
+  id: string,
+  store = defaultStore(),
+): CustomMove[] {
+  return writeCustom(
+    loadCustomMoves(store).filter((m) => m.id !== id),
+    store,
+  );
+}
+
+export function clearCustomMoves(store = defaultStore()) {
+  try {
+    store?.removeItem(CUSTOM_KEY);
+  } catch {
+    // Ignore storage errors on clear.
+  }
 }

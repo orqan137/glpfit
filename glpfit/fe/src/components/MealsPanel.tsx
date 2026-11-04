@@ -27,10 +27,18 @@ const COLORS = [
   "#e5484d",
   "#c99a06",
 ];
-const SAMPLE = {
-  before: "samples/plate-before.webp",
-  after: "samples/plate-after.webp",
-  result: "samples/plate-result.json",
+// A Korean and a Western plate, each with a real result computed earlier.
+const SAMPLES = {
+  ko: {
+    before: "samples/plate-before.webp",
+    after: "samples/plate-after.webp",
+    result: "samples/plate-result.json",
+  },
+  en: {
+    before: "samples/plate-en-before.webp",
+    after: "samples/plate-en-after.webp",
+    result: "samples/plate-result-en.json",
+  },
 };
 
 type MealsPanelProps = {
@@ -196,6 +204,7 @@ export function MealsPanel({
   }
 
   async function addSample() {
+    const SAMPLE = SAMPLES[lang];
     setBusy("before");
     setError("");
     try {

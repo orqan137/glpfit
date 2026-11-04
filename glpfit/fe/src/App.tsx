@@ -22,10 +22,15 @@ import { ProfilePanel } from "./components/ProfilePanel";
 import {
   MOVES,
   ROUTINES,
+  addCustomMove,
+  clearCustomMoves,
   clearExercise,
+  loadCustomMoves,
+  removeCustomMove,
   loadExercise,
   setSets,
   setsOn,
+  type CustomMove,
   type ExerciseDay,
 } from "./exercise";
 import { loadRuns } from "./history";
@@ -80,6 +85,9 @@ export default function App() {
   const [shots, setShots] = useState<Injection[]>(() => loadInjections());
   const [meals, setMeals] = useState<Meal[]>(() => loadMeals());
   const [exercise, setExercise] = useState<ExerciseDay[]>(() => loadExercise());
+  const [customMoves, setCustomMoves] = useState<CustomMove[]>(() =>
+    loadCustomMoves(),
+  );
   const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
@@ -122,7 +130,9 @@ export default function App() {
           ? 1
           : 2;
   const routine = ROUTINES[phaseIndex];
-  const routineSets = routine.items.reduce((sum, item) => sum + item.sets, 0);
+  const routineSets =
+    routine.items.reduce((sum, item) => sum + item.sets, 0) +
+    customMoves.reduce((sum, move) => sum + move.sets, 0);
   const setsToday = setsOn(exercise, today);
   const weight = weightSummary(profile, logs);
   const intake = intakeOn(meals, today);
@@ -254,7 +264,12 @@ export default function App() {
                 phaseName={phase?.name ?? null}
                 proteinG={intake.proteinG}
                 proteinGoal={goal}
-                onSets={(move, sets) => setExercise(setSets(today, move, sets))}
+                customMoves={customMoves}
+                onSets={(move, sets, name) =>
+                  setExercise(setSets(today, move, sets, name))
+                }
+                onAddCustom={(move) => setCustomMoves(addCustomMove(move))}
+                onRemoveCustom={(id) => setCustomMoves(removeCustomMove(id))}
               />
             )}
 
@@ -299,6 +314,8 @@ export default function App() {
                     clearInjections();
                     clearMeals();
                     clearExercise();
+                    clearCustomMoves();
+                    setCustomMoves([]);
                     setExercise([]);
                     setProfile(null);
                     setLogs([]);
