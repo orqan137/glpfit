@@ -27,10 +27,13 @@ export function LevelCurve({
   shots,
   drug,
   nextIn,
+  showDoses = false,
 }: {
   shots: Injection[];
   drug: Drug | null;
   nextIn: number | null;
+  /** Label each shot with its dose, so one chart also shows the dose history. */
+  showDoses?: boolean;
 }) {
   const points = levelCurve(shots, drug, PAST, FUTURE);
   const x = (day: number) => ((day + PAST) / (PAST + FUTURE)) * W;
@@ -47,15 +50,19 @@ export function LevelCurve({
   const nowLevel = past.at(-1)?.level ?? 0;
   const area = `${line(past)} L${x(0)},${H} L${x(-PAST)},${H} Z`;
   const today = new Date().setHours(0, 0, 0, 0);
-  const shotDays = shots
+  const marks = shots
     .map((s) => {
       const [yy, mm, dd] = s.date.split("-").map(Number);
-      return Math.round(
-        (new Date(yy, mm - 1, dd).getTime() - today) / 86_400_000,
-      );
+      return {
+        day: Math.round(
+          (new Date(yy, mm - 1, dd).getTime() - today) / 86_400_000,
+        ),
+        dose: s.doseMg,
+      };
     })
-    .filter((d) => d >= -PAST && d <= 0);
-  return (
+    .filter((m) => m.day >= -PAST && m.day <= 0);
+  const shotDays = marks.map((m) => m.day);
+  const chart = (
     <svg
       className="level-curve"
       viewBox={`0 0 ${W} ${H}`}
@@ -83,6 +90,22 @@ export function LevelCurve({
       <line className="level-today" x1={x(0)} x2={x(0)} y1={0} y2={H} />
       <circle className="level-now" cx={x(0)} cy={y(nowLevel)} r={5} />
     </svg>
+  );
+  if (!showDoses) return chart;
+  // Text stays outside the stretched SVG so it is never distorted.
+  return (
+    <div className="level-wrap">
+      {chart}
+      {marks.map((m) => (
+        <span
+          key={m.day}
+          className="level-dose"
+          style={{ left: `${(x(m.day) / W) * 100}%` }}
+        >
+          {m.dose}mg
+        </span>
+      ))}
+    </div>
   );
 }
 

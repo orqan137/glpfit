@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, Check, FileText, Syringe, X } from "lucide-react";
 import { useTr } from "../i18n";
+import { LevelCurve } from "./CycleCard";
 import {
   DRUG_INFO,
   DRUG_INGREDIENT_EN,
@@ -131,6 +132,18 @@ export function MedicationPanel({
             )}
           </div>
         </div>
+        <LevelCurve
+          shots={shots}
+          drug={drug}
+          nextIn={schedule.daysUntil}
+          showDoses
+        />
+        <p className="cycle-note">
+          {tr(
+            "설명서 반감기로 계산한 추정 곡선이에요. 실제 혈중 농도가 아니에요.",
+            "Estimated from the label half-life, not a measured blood level.",
+          )}
+        </p>
         {schedule.nextSite && (
           <p className="shot-site">
             {tr("추천 부위", "Suggested site")}{" "}
@@ -259,7 +272,17 @@ export function MedicationPanel({
         </span>
       </button>
 
-      <div className="card form-card">
+      <details className="card form-card fold">
+        <summary className="memory-head">
+          <span className="card-title">
+            {tr("약 설정", "Medication settings")}
+          </span>
+          <span className="meal-optional">
+            {drug
+              ? `${drugName(drug)} ${currentDose ?? ""}mg`
+              : tr("설정 필요", "Not set")}
+          </span>
+        </summary>
         <div className="form-field">
           <span>{tr("약", "Medication")}</span>
           <div className="segment">
@@ -344,57 +367,15 @@ export function MedicationPanel({
             ))}
           </div>
         </div>
-      </div>
+      </details>
 
-      {ladder.length > 0 && (
-        <div className="card ladder-card">
-          <div className="memory-head">
-            <span className="card-title">{tr("용량 단계", "Dose steps")}</span>
-            {schedule.weeksOnDose > 0 && (
-              <span className="meal-optional">
-                {tr(
-                  `현재 용량 ${schedule.weeksOnDose}주째`,
-                  `Week ${schedule.weeksOnDose} on this dose`,
-                )}
-              </span>
-            )}
-          </div>
-          <ol className="ladder">
-            {ladder.map((mg, index) => (
-              <li
-                key={mg}
-                className={
-                  mg === currentDose
-                    ? "current"
-                    : currentDose !== null && mg < currentDose
-                      ? "done"
-                      : ""
-                }
-              >
-                <span
-                  className="ladder-bar"
-                  style={{ height: `${30 + index * 12}px` }}
-                />
-                <span>{mg}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="field-hint">
-            {tr(
-              "제품 설명서의 4주 단위 증량 단계를 참고용으로 보여 줘요. 용량 변경은 반드시 처방 의료진이 결정합니다.",
-              "The label's 4-week dose steps, for reference only. Your prescriber decides any dose change.",
-            )}
-          </p>
-        </div>
-      )}
-
-      <div className="card memory-card">
-        <div className="memory-head">
+      <details className="card memory-card fold">
+        <summary className="memory-head">
           <span className="card-title">{tr("주사 기록", "Shot log")}</span>
           <span className="meal-optional">
             {tr(`${shots.length}회`, `${shots.length}`)}
           </span>
-        </div>
+        </summary>
         {shots.length ? (
           <ul className="memory-list shot-list">
             {shots.slice(0, 12).map((shot) => (
@@ -422,7 +403,7 @@ export function MedicationPanel({
             )}
           </p>
         )}
-      </div>
+      </details>
     </section>
   );
 }

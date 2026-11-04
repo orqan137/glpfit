@@ -4092,3 +4092,68 @@ textarea:read-only {
     color: #fff;
   }
 }
+
+/* v6: 투약 페이지 정리 */
+.fold > summary {
+  list-style: none;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-right: 1.5px solid var(--label-tertiary);
+  border-bottom: 1.5px solid var(--label-tertiary);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.2s;
+}
+.fold[open] > summary::after {
+  transform: rotate(-135deg) translateY(-1px);
+}
+.fold[open] > summary {
+  margin-bottom: 10px;
+}
+.level-wrap {
+  position: relative;
+  padding-top: 16px;
+}
+.level-dose {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-text);
+  white-space: nowrap;
+}
+.shot-card .level-curve {
+  height: 80px;
+}
+.shot-card .level-area {
+  fill: var(--accent-tint);
+}
+.shot-card .level-line,
+.shot-card .level-next {
+  stroke: var(--accent);
+}
+.shot-card .level-shot,
+.shot-card .level-today {
+  stroke: var(--separator);
+}
+.shot-card .level-shot-dot,
+.shot-card .level-now {
+  fill: var(--accent);
+}
+.shot-card .level-now {
+  stroke: var(--accent-tint);
+}
+.shot-card .cycle-note {
+  margin: -4px 0 0;
+  color: var(--label-tertiary);
+  opacity: 1;
+}
