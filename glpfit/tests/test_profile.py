@@ -257,3 +257,12 @@ def test_report_endpoint_returns_facts_without_key():
             assert response.json()["facts"]["progress"]["logged_days"] >= 1
     finally:
         app.dependency_overrides.clear()
+
+
+def test_today_snapshot_and_memory_dedupe():
+    text = personal_instructions(context(), today=TODAY)
+    assert "Today so far: weight 79.0kg" in text
+    again = json.loads(
+        execute_tool("remember", '{"fact":"기름진 음식 먹으면 메스꺼움"}', None, context())
+    )
+    assert again == {"saved": False, "reason": "already in MEMORY"}

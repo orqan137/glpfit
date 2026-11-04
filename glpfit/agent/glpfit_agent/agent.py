@@ -16,7 +16,7 @@ from glpfit_agent.profile import (
     today_kst,
 )
 from glpfit_agent.tools import (
-    TOOLS,
+    COACH_TOOLS,
     MealPayload,
     analyze_meal,
     coaching_tips,
@@ -109,7 +109,7 @@ def agent_events(
             model=settings.meta_model,
             instructions=instructions,
             input=history,
-            tools=TOOLS,
+            tools=COACH_TOOLS,
             max_output_tokens=settings.meta_max_output_tokens,
             store=False,
             include=["reasoning.encrypted_content"],

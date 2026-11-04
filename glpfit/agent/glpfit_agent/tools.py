@@ -421,8 +421,18 @@ def execute_tool(
             fact = RememberArguments.model_validate_json(arguments).fact
         except ValidationError:
             return json.dumps({"error": "fact는 2~120자 문장이어야 합니다."}, ensure_ascii=False)
+        # Hermes-style memory hygiene: do not store the same fact twice.
+        known = [m.casefold() for m in (context.memories if context else [])]
+        if any(fact.casefold() in m or m in fact.casefold() for m in known):
+            return json.dumps({"saved": False, "reason": "already in MEMORY"}, ensure_ascii=False)
         # Storage lives in the browser: the agent loop forwards this as a memory event.
         return json.dumps({"saved": True, "fact": fact}, ensure_ascii=False)
     if name == "get_medication_schedule":
         return json.dumps(medication_schedule(context), ensure_ascii=False)
     return json.dumps({"error": "Unknown tool"})
+
+
+# What the coach is offered. get_current_time and analyze_meal remain callable for the
+# key-free demo and tests, but the app no longer sends meal features to the coach.
+COACH_TOOL_NAMES = ("get_progress", "get_medication_schedule", "get_coaching_tips", "remember")
+COACH_TOOLS: list[ToolParam] = [tool for tool in TOOLS if tool["name"] in COACH_TOOL_NAMES]

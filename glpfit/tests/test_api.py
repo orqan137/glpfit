@@ -30,8 +30,6 @@ def test_health_exposes_readiness_but_no_key(client):
     assert response.status_code == 200
     assert response.json()["live_configured"] is True
     assert response.json()["tools"] == [
-        "get_current_time",
-        "analyze_meal",
         "get_coaching_tips",
         "get_progress",
         "remember",

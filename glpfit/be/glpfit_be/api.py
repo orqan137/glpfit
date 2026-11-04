@@ -11,7 +11,7 @@ from glpfit_agent.config import Settings, create_client
 from glpfit_agent.plate import analyze_plate, plate_note
 from glpfit_agent.profile import CoachContext, today_kst
 from glpfit_agent.report import report_facts, write_report
-from glpfit_agent.tools import TOOLS, MealPayload
+from glpfit_agent.tools import COACH_TOOLS, MealPayload
 from glpfit_agent.voice import extract_checkin, transcribe
 from openai import APIConnectionError, APIStatusError, APITimeoutError
 from pydantic import BaseModel, ConfigDict, Field
@@ -155,7 +155,7 @@ def health(settings: Annotated[Settings, Depends(get_settings)]) -> HealthRespon
         model=settings.meta_model,
         live_configured=settings.has_key,
         max_steps=settings.meta_max_agent_steps,
-        tools=[tool["name"] for tool in TOOLS],
+        tools=[tool["name"] for tool in COACH_TOOLS],
     )
 
 

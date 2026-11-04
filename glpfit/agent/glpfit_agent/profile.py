@@ -203,6 +203,29 @@ def cycle_line(ctx: CoachContext, today: date) -> str | None:
     )
 
 
+def today_line(ctx: CoachContext, today: date) -> str | None:
+    """What is already logged today, so a simple question needs no tool call."""
+    log = next((log for log in ctx.logs if log.date == today.isoformat()), None)
+    if log is None:
+        return "Today so far: nothing logged yet."
+    parts = []
+    if log.weight_kg is not None:
+        parts.append(f"weight {log.weight_kg}kg")
+    if log.protein_g is not None:
+        target = ctx.profile.start_weight_kg if ctx.profile else None
+        parts.append(
+            f"protein {log.protein_g}g from meal photos"
+            + (f" (reference ~{round(target)}g)" if target else "")
+        )
+    if log.meal_notes:
+        parts.append(f"{len(log.meal_notes)} meal photo(s)")
+    if log.exercise_sets:
+        parts.append(f"{log.exercise_sets} exercise sets ({', '.join(log.exercise_notes)})")
+    if log.symptoms:
+        parts.append("symptoms: " + ", ".join(SYMPTOM_TEXT[s] for s in log.symptoms))
+    return "Today so far: " + ("; ".join(parts) if parts else "nothing logged yet") + "."
+
+
 def personal_instructions(ctx: CoachContext | None, today: date | None = None) -> str:
     """The per-user part of the system prompt. Empty when nothing is known yet."""
     if ctx is None:
@@ -229,10 +252,12 @@ def personal_instructions(ctx: CoachContext | None, today: date | None = None) -
         lines.append(f"Tone: {TONE_TEXT[profile.tone]}.")
     if line := cycle_line(ctx, today):
         lines.append(line)
+    if snapshot := today_line(ctx, today):
+        lines.append(snapshot)
     if ctx.logs:
         lines.append(
             f"The user has {len(ctx.logs)} days of logs. Call get_progress before commenting on "
-            "weight, water, protein or symptom trends."
+            "trends over several days."
         )
     else:
         lines.append("No daily logs yet: encourage logging weight, the shot and a meal photo.")
