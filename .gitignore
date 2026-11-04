@@ -1,0 +1,26 @@
+.env
+.env.*
+!.env.example
+.venv/
+.tools/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+.coverage
+htmlcov/
+outputs/
+node_modules/
+*.tsbuildinfo
+trash/
+
+# Local API key file (contains secrets)
+env.txt
+
+# Not for the public repo
+*.deb
+docs/
+SUBMISSION.md

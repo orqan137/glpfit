@@ -1,0 +1,38 @@
+[project]
+name = "glpfit"
+version = "0.1.0"
+description = "지엘피핏: Meta Model API 기반 에이전트 (GLP-1 다이어트 코치)"
+readme = { text = "지엘피핏: Meta Model API 기반 에이전트 (GLP-1 다이어트 코치)", content-type = "text/markdown" }
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "openai>=2,<3",
+    "pydantic-settings>=2,<3",
+    "rich>=14,<15",
+    "tzdata>=2025.2",
+    "uvicorn>=0.34,<1",
+]
+
+[project.scripts]
+glpfit = "glpfit_agent.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.12,<1", "httpx>=0.28,<1"]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["be/glpfit_be", "agent/glpfit_agent"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["be", "agent"]

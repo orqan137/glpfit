@@ -1,0 +1,24 @@
+{
+  "name": "glpfit-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "fe"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others --names api,web --prefix-colors cyan,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node scripts/backend.mjs",
+    "dev:web": "npm run dev --workspace fe",
+    "build": "npm run build --workspace fe",
+    "test": "npm run test --workspace fe",
+    "format": "prettier --write fe/src fe/index.html fe/tsconfig.json fe/vite.config.ts fe/package.json package.json scripts/backend.mjs",
+    "format:check": "prettier --check fe/src fe/index.html fe/tsconfig.json fe/vite.config.ts fe/package.json package.json scripts/backend.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6",
+    "prettier": "^3.9.10"
+  }
+}
