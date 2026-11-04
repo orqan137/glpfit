@@ -240,6 +240,7 @@ def test_report_facts_find_symptom_pattern_by_injection_day():
     }
     assert pattern[1]["cycle_day"] == 5 and pattern[1]["symptoms"] == {}
     assert [step["dose_mg"] for step in dose_history(ctx)] == [2.5, 5.0]
+    assert [step["drug"] for step in dose_history(ctx, "en")] == ["Mounjaro", "Mounjaro"]
     facts = report_facts(ctx, TODAY)
     assert facts["period"]["to"] == "2026-11-04"
     assert "recent" not in facts["progress"]

@@ -23,6 +23,10 @@
 
 ---
 
+## Demo video
+
+[Watch or download the 2-minute 48-second English demo](https://github.com/orqan137/glpfit/raw/refs/heads/main/glpfit-demo-final.mp4). The edited walkthrough includes English narration and feature explanations. [English captions](glpfit-demo-final.en.srt) are also included. Waiting time is shortened; all app footage comes from a recorded session with a demo persona.
+
 ## Why
 
 Mounjaro (tirzepatide, dual GIP/GLP-1) and Wegovy (semaglutide, GLP-1) are **once-a-week shots**, and people feel the week: appetite is lowest and nausea is common right after the shot, then appetite comes back before the next one. Weight drops fast, and **muscle goes with it** unless people get enough protein and do some strength work.
@@ -38,7 +42,7 @@ Most diet apps treat every day the same and make you type in food. GLPfit asks o
 | **Meals** | **Just take a photo.** Plate Lens finds every food, estimates protein and calories, and with an after photo measures what was actually eaten. Daily protein fills itself in. |
 | **Exercise** | A bodyweight routine that follows the cycle (gentle right after the shot, strength on steady days, legs when appetite returns), plus **your own exercises** with reps and sets. |
 | **Coach** | A chat agent that reads all of the above through tools, adapts to the cycle phase and remembers your patterns. Korean and English. |
-| **Clinic PDF** | One tap turns the last 30 days into a one-page report for your monthly visit: dose history, side effects by day after the shot, measured protein, questions to ask. |
+| **Clinic PDF** | One tap prints the last 30 days of record tables without an AI call: dose history, symptoms by day after the shot and photo-estimated protein. An optional AI summary adds a write-up and questions for the clinician. |
 
 ## How it uses Meta AI
 
@@ -47,7 +51,7 @@ Most diet apps treat every day the same and make you type in food. GLPfit asks o
 | **SAM 3.1** | Plate Lens. Segmentation as a measuring tool: it counts and sizes each food in the before and after photos (e.g. 10 chicken slices → 3) to estimate what was eaten. |
 | **Muse Spark** (vision, structured output) | Plate Lens. Names foods and estimates protein, kcal and leftovers under a strict JSON schema; its estimate and SAM's geometry cross-check each other. |
 | **Muse Spark** (agent) | The coach. Calls our tools on its own and keeps multi-turn context. |
-| **Muse Spark** (structured output) | The clinician report, written from server-computed facts. |
+| **Muse Spark** (structured output) | An optional clinician-report summary, written from server-computed facts. Printing record tables requires no model call. |
 | **Muse Voice Transcribe** | Voice check-in endpoint (`/api/voice-checkin`): speech → structured daily log, ready for a voice UI. |
 | **Muse Image** | Generated and edited the before/after sample photos in this repo. |
 
@@ -117,7 +121,7 @@ glpfit/
 
 ```bash
 cd glpfit
-uv run --locked pytest          # 53 tests
+uv run --locked pytest          # 55 tests
 uv run --locked ruff check .
 npm test                        # 16 tests
 npm run build

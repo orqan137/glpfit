@@ -1,0 +1,135 @@
+1
+00:00:00,000 --> 00:00:05,903
+Meet GLPfit, a weekly shot companion for Mounjaro and Wegovy users.
+
+2
+00:00:05,903 --> 00:00:09,635
+Appetite and energy change across the week.
+
+3
+00:00:09,635 --> 00:00:15,972
+GLPfit brings weight, shots, meals, and movement into one daily
+routine.
+
+4
+00:00:18,000 --> 00:00:24,306
+On shot day, Minji logs her injection and follows the suggested
+site rotation.
+
+5
+00:00:24,306 --> 00:00:29,723
+Her next shot, remaining pens, and clinic reminder update together.
+
+6
+00:00:29,723 --> 00:00:32,552
+The curve uses the label half life.
+
+7
+00:00:32,552 --> 00:00:36,271
+It is an estimate, not a measured blood level.
+
+8
+00:00:38,000 --> 00:00:44,793
+Symptoms are recorded by day after the injection, making weekly
+patterns easier to discuss.
+
+9
+00:00:44,793 --> 00:00:49,123
+Weight takes one number a day, keeping the routine simple.
+
+10
+00:00:51,000 --> 00:00:52,932
+Meals start with a photo.
+
+11
+00:00:52,932 --> 00:00:59,424
+Muse Spark identifies foods and estimates protein and calories in
+structured output.
+
+12
+00:00:59,424 --> 00:01:03,984
+SAM 3.1 adds food instance counts and geometry.
+
+13
+00:01:03,984 --> 00:01:11,016
+The app cross checks these signals, using vision estimates when
+segmentation misses a food.
+
+14
+00:01:13,000 --> 00:01:18,128
+After the meal, a second photo estimates what was actually eaten.
+
+15
+00:01:18,128 --> 00:01:22,072
+Here, some foods are finished while others remain.
+
+16
+00:01:22,072 --> 00:01:28,068
+The estimated protein and calories flow into today's meal log
+automatically.
+
+17
+00:01:28,068 --> 00:01:32,406
+These are photo estimates, not laboratory measurements.
+
+18
+00:01:34,000 --> 00:01:37,288
+The exercise plan follows the shot cycle.
+
+19
+00:01:37,288 --> 00:01:41,058
+Right after a shot, Minji sees gentle movement.
+
+20
+00:01:41,058 --> 00:01:44,106
+Steadier days emphasize strength work.
+
+21
+00:01:44,106 --> 00:01:52,207
+She checks off sets and adds stair climbing with her own duration
+and sets, so the plan fits her day.
+
+22
+00:01:54,000 --> 00:01:57,406
+Minji asks what to eat when she feels queasy.
+
+23
+00:01:57,406 --> 00:02:05,506
+The Muse Spark agent checks the app's tools for her schedule and
+trends, then gives context aware guidance.
+
+24
+00:02:05,506 --> 00:02:11,258
+Calculations stay on the server, and memory can preserve useful
+preferences.
+
+25
+00:02:11,258 --> 00:02:16,481
+The coach does not diagnose, prescribe, or recommend changing a
+dose.
+
+26
+00:02:18,000 --> 00:02:22,583
+One tap prints thirty days of record tables without calling AI.
+
+27
+00:02:22,583 --> 00:02:28,112
+The report groups dose history, weight, and symptoms by injection
+cycle day.
+
+28
+00:02:28,112 --> 00:02:33,277
+An optional AI summary adds a write up and questions for the
+clinician.
+
+29
+00:02:35,000 --> 00:02:36,993
+English and Korean.
+
+30
+00:02:36,993 --> 00:02:40,874
+Open source, with sample data to try.
+
+31
+00:02:40,874 --> 00:02:46,538
+GLPfit: a clearer weekly routine, built with Meta AI.

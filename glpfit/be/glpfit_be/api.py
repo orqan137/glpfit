@@ -101,19 +101,21 @@ class ReportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     context: CoachContext
     lang: Literal["ko", "en"] = "ko"
+    include_summary: bool = True
 
 
 @app.post("/api/report")
 def report(payload: ReportRequest, settings: Annotated[Settings, Depends(get_settings)]) -> dict:
     """Clinician report: computed facts always; Muse Spark write-up when a key is set."""
     facts = report_facts(payload.context, today_kst(), lang=payload.lang)
-    if not settings.has_key:
+    if not settings.has_key or not payload.include_summary:
         return {"facts": facts, "report": None}
     try:
         with create_client(settings) as client:
             written = write_report(client, settings, facts, payload.lang)
-    except (APIStatusError, APITimeoutError, APIConnectionError, RuntimeError, ValueError) as exc:
-        raise upstream_error(exc) from exc
+    except (APIStatusError, APITimeoutError, APIConnectionError, RuntimeError, ValueError):
+        # The user's computed records remain useful even if the optional AI write-up fails.
+        return {"facts": facts, "report": None, "summary_unavailable": True}
     return {"facts": facts, "report": written}
 
 

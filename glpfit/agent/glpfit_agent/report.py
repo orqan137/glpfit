@@ -92,7 +92,7 @@ def symptoms_by_cycle(ctx: CoachContext | None, lang: str = "ko") -> list[dict]:
     ]
 
 
-def dose_history(ctx: CoachContext | None) -> list[dict]:
+def dose_history(ctx: CoachContext | None, lang: str = "ko") -> list[dict]:
     """Dose steps with the date each one started."""
     if ctx is None:
         return []
@@ -100,6 +100,8 @@ def dose_history(ctx: CoachContext | None) -> list[dict]:
     for shot in sorted(ctx.injections, key=lambda s: s.date):
         if not steps or steps[-1]["dose_mg"] != shot.dose_mg:
             name = DRUGS.get(shot.drug, {}).get("name", "기타")
+            if lang == "en":
+                name = {"mounjaro": "Mounjaro", "wegovy": "Wegovy"}.get(shot.drug, "Other")
             steps.append({"drug": name, "dose_mg": shot.dose_mg, "from": shot.date, "shots": 0})
         steps[-1]["shots"] += 1
     return steps
@@ -112,7 +114,7 @@ def report_facts(ctx: CoachContext | None, today: date, days: int = 30, lang: st
         "period": {"from": (today - timedelta(days=days - 1)).isoformat(), "to": today.isoformat()},
         "progress": stats,
         "schedule": medication_schedule(ctx, today),
-        "dose_history": dose_history(ctx),
+        "dose_history": dose_history(ctx, lang),
         "symptoms_by_cycle_day": symptoms_by_cycle(ctx, lang),
         "phases": [{"days_after_shot": p["days"], "name": p["name"]} for p in PHASES],
         "plate_lens_meals": [note for log in (ctx.logs if ctx else []) for note in log.meal_notes][

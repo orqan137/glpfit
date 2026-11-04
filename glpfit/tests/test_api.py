@@ -113,3 +113,50 @@ def test_live_upstream_billing_error_is_an_error_event(client, monkeypatch):
     assert "402" in stream[-1]["message"]
     assert "never-echo-this" not in response.text
     assert "private-upstream-body" not in response.text
+
+
+def test_report_preserves_record_tables_when_ai_summary_fails(client, monkeypatch):
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        _env_file=None, model_api_key="test-only"
+    )
+
+    class FakeClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    def failed_report(*args):
+        raise RuntimeError("private-upstream-body")
+
+    monkeypatch.setattr("glpfit_be.api.create_client", lambda _: FakeClient())
+    monkeypatch.setattr("glpfit_be.api.write_report", failed_report)
+    response = client.post(
+        "/api/report",
+        json={"context": {"logs": [{"date": "2026-11-05", "weightKg": 79}]}, "lang": "en"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["report"] is None
+    assert body["summary_unavailable"] is True
+    assert "period" in body["facts"]
+    assert "dose_history" in body["facts"]
+    assert "private-upstream-body" not in response.text
+
+
+def test_report_records_only_does_not_call_paid_api(client, monkeypatch):
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        _env_file=None, model_api_key="test-only"
+    )
+
+    def forbidden(*args):
+        pytest.fail("Records-only report must not create a paid API client")
+
+    monkeypatch.setattr("glpfit_be.api.create_client", forbidden)
+    response = client.post(
+        "/api/report", json={"context": {}, "lang": "en", "include_summary": False}
+    )
+    assert response.status_code == 200
+    assert response.json()["report"] is None
+    assert "dose_history" in response.json()["facts"]

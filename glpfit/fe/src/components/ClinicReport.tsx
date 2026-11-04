@@ -48,18 +48,24 @@ export function ClinicReport({
   const { lang, tr } = useTr();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [summaryUnavailable, setSummaryUnavailable] = useState(false);
   const [facts, setFacts] = useState<ReportFacts | null>(null);
   const [report, setReport] = useState<Report | null>(null);
   const started = useRef(false);
 
-  async function build() {
+  async function build(includeSummary = true) {
     setBusy(true);
     setError("");
+    setSummaryUnavailable(false);
     try {
       const response = await fetch("/api/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context, lang }),
+        body: JSON.stringify({
+          context,
+          lang,
+          include_summary: includeSummary,
+        }),
       });
       const body = await response.json();
       if (!response.ok)
@@ -70,6 +76,7 @@ export function ClinicReport({
         );
       setFacts(body.facts);
       setReport(body.report);
+      setSummaryUnavailable(body.summary_unavailable === true);
       if (autoPrint) setTimeout(() => window.print(), 400);
     } catch (reason) {
       setError(
@@ -85,7 +92,8 @@ export function ClinicReport({
   useEffect(() => {
     if (autoPrint && !started.current) {
       started.current = true;
-      void build();
+      // Printing the user's records needs no inference; AI writing is opt-in.
+      void build(false);
     }
     // Build once when opened in auto mode.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,9 +132,18 @@ export function ClinicReport({
         </p>
       )}
       {error && (
-        <p className="meal-error" role="alert">
-          {error}
-        </p>
+        <div>
+          <p className="meal-error" role="alert">
+            {error}
+          </p>
+          <button
+            className="ghost-button"
+            disabled={busy}
+            onClick={() => void build(false)}
+          >
+            {tr("AI 호출 없이 기록 표 열기", "Open record tables without AI")}
+          </button>
+        </div>
       )}
       {facts && (
         <article
@@ -146,6 +163,14 @@ export function ClinicReport({
                 : tr("GLP-1 치료 기록", "GLP-1 treatment log")}
             </h3>
             {report && <p>{report.headline}</p>}
+            {summaryUnavailable && (
+              <p role="status">
+                {tr(
+                  "AI 요약을 만들지 못해 기록 표를 표시합니다. PDF로 저장할 수 있어요.",
+                  "AI summary unavailable. Your record tables are ready to save as PDF.",
+                )}
+              </p>
+            )}
           </header>
           <div className="report-stats">
             <div>
@@ -248,11 +273,25 @@ export function ClinicReport({
               </ul>
             </section>
           )}
+          {!report && (
+            <button
+              className="ghost-button print-button"
+              disabled={busy}
+              onClick={() => void build(true)}
+            >
+              {tr("AI 요약 추가 (모델 호출)", "Add AI summary (model call)")}
+            </button>
+          )}
           <footer>
-            {tr(
-              "자가 기록과 사진 추정을 바탕으로 Meta Muse Spark가 정리했습니다. 진단이나 처방이 아닙니다.",
-              "Summarized by Meta Muse Spark from self-logs and photo estimates. Not a diagnosis or prescription.",
-            )}
+            {report
+              ? tr(
+                  "자가 기록과 사진 추정을 바탕으로 Meta Muse Spark가 정리했습니다. 진단이나 처방이 아닙니다.",
+                  "Summarized by Meta Muse Spark from self-logs and photo estimates. Not a diagnosis or prescription.",
+                )
+              : tr(
+                  "자가 기록과 사진 추정에서 계산한 기록 표입니다. 진단이나 처방이 아닙니다.",
+                  "Record tables computed from self-logs and photo estimates. Not a diagnosis or prescription.",
+                )}
           </footer>
           <button
             className="ghost-button print-button"
