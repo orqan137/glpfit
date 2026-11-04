@@ -32,6 +32,7 @@ type HomeViewProps = {
   sets: number;
   routineSets: number;
   routineName: string;
+  pensLeft: number | null;
   onWeight: (kg: number | null) => void;
   onOpen: (tab: Tab) => void;
 };
@@ -208,6 +209,11 @@ export function HomeView(props: HomeViewProps) {
             <p className="core-sub">
               {phase?.name}
               {due && `, ${due}`}
+              {props.pensLeft !== null &&
+                tr(
+                  `, 펜 ${props.pensLeft}개 남음`,
+                  `, ${props.pensLeft} pens left`,
+                )}
             </p>
             <LevelCurve
               shots={props.shots}

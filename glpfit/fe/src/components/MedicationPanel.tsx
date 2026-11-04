@@ -11,7 +11,9 @@ import {
   type Drug,
   type Injection,
   type Schedule,
+  supplyStatus,
   type Site,
+  type Supply,
 } from "../medication";
 import {
   SYMPTOM_LABEL,
@@ -33,6 +35,8 @@ type MedicationPanelProps = {
   symptoms: Symptom[];
   onSymptoms: (symptoms: Symptom[]) => void;
   onReport: () => void;
+  supply: Supply | null;
+  onSupply: (supply: Supply | null) => void;
 };
 
 export function MedicationPanel({
@@ -45,6 +49,8 @@ export function MedicationPanel({
   symptoms,
   onSymptoms,
   onReport,
+  supply,
+  onSupply,
 }: MedicationPanelProps) {
   const { lang, tr } = useTr();
   const drug = profile.drug;
@@ -144,6 +150,31 @@ export function MedicationPanel({
             "Estimated from the label half-life, not a measured blood level.",
           )}
         </p>
+        {supply &&
+          (() => {
+            const status = supplyStatus(supply, shots, schedule);
+            return (
+              <p className={`shot-supply${status.left <= 1 ? " low" : ""}`}>
+                <b>
+                  {tr(
+                    `펜 ${status.left}/${supply.pens}개 남음`,
+                    `${status.left} of ${supply.pens} pens left`,
+                  )}
+                </b>
+                <span>
+                  {status.left > 0
+                    ? tr(
+                        `마지막 펜 ${formatDay(status.lastShot)}, ${formatDay(status.visitBy)}까지 병원에서 처방받기`,
+                        `Last pen ${formatDay(status.lastShot)}, see your clinic by ${formatDay(status.visitBy)}`,
+                      )
+                    : tr(
+                        "펜을 다 썼어요. 처방을 받아 오세요",
+                        "All pens used. Time for a new prescription",
+                      )}
+                </span>
+              </p>
+            );
+          })()}
         {schedule.nextSite && (
           <p className="shot-site">
             {tr("추천 부위", "Suggested site")}{" "}
@@ -363,6 +394,42 @@ export function MedicationPanel({
                 }
               >
                 {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="form-field">
+          <span>
+            {tr(
+              "처방 (보통 4주치를 한 번에)",
+              "Prescription pickup (often 4 weeks at once)",
+            )}
+          </span>
+          <div className="supply-row">
+            <input
+              type="date"
+              value={supply?.date ?? ""}
+              max={dayKey()}
+              aria-label={tr("처방받은 날", "Pickup date")}
+              onChange={(event) =>
+                onSupply(
+                  event.target.value
+                    ? { date: event.target.value, pens: supply?.pens ?? 4 }
+                    : null,
+                )
+              }
+            />
+            {[2, 4, 8].map((pens) => (
+              <button
+                key={pens}
+                type="button"
+                className={`chip${supply?.pens === pens ? " on" : ""}`}
+                aria-pressed={supply?.pens === pens}
+                onClick={() =>
+                  onSupply({ date: supply?.date ?? dayKey(), pens })
+                }
+              >
+                {tr(`${pens}주치`, `${pens} wk`)}
               </button>
             ))}
           </div>

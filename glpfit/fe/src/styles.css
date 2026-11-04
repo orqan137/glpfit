@@ -4214,3 +4214,37 @@ textarea:read-only {
   color: #fff;
   background: var(--cat-motion);
 }
+
+/* v8: 처방 펜 */
+.shot-supply {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--label-secondary);
+  background: var(--accent-tint);
+  word-break: keep-all;
+}
+.shot-supply b {
+  color: var(--accent-text);
+}
+.shot-supply.low {
+  background: var(--warning-tint);
+}
+.shot-supply.low b {
+  color: var(--warning);
+}
+.supply-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.supply-row input {
+  width: auto;
+  flex: 1;
+  min-width: 140px;
+}

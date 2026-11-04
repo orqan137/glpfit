@@ -330,3 +330,51 @@ export function levelCurve(
     projected: day > 0,
   }));
 }
+
+/** A prescription supply, e.g. four weekly pens picked up at once (common in Korea). */
+export type Supply = { date: string; pens: number };
+
+const SUPPLY_KEY = "glpfit.supply.v1";
+
+export function loadSupply(store = defaultStore()): Supply | null {
+  try {
+    const parsed = JSON.parse(
+      store?.getItem(SUPPLY_KEY) ?? "null",
+    ) as Supply | null;
+    return parsed && typeof parsed.date === "string" && parsed.pens > 0
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveSupply(
+  supply: Supply | null,
+  store = defaultStore(),
+): Supply | null {
+  try {
+    if (supply) store?.setItem(SUPPLY_KEY, JSON.stringify(supply));
+    else store?.removeItem(SUPPLY_KEY);
+  } catch {
+    // Keep in memory only.
+  }
+  return supply;
+}
+
+export type SupplyStatus = { left: number; lastShot: number; visitBy: number };
+
+/** Pens left since the pickup, and the last shot day the supply covers. */
+export function supplyStatus(
+  supply: Supply,
+  shots: Injection[],
+  schedule: Schedule,
+): SupplyStatus {
+  const used = shots.filter((s) => s.date >= supply.date).length;
+  const left = Math.max(0, supply.pens - used);
+  const next = schedule.nextDue ?? parseDay(supply.date);
+  const lastShot =
+    left > 0 ? next + (left - 1) * 7 * DAY_MS : next - 7 * DAY_MS;
+  // Get the next prescription a few days before the last pen is used.
+  return { left, lastShot, visitBy: lastShot - 3 * DAY_MS };
+}

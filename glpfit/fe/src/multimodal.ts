@@ -1,4 +1,4 @@
-/** Client side of the Meta multimodal features: Plate Lens and voice check-in. */
+/** Client side of Plate Lens (Muse Spark vision + SAM 3.1). */
 
 export type PlateItem = {
   name: string;
@@ -30,18 +30,6 @@ export type PlateResult = {
   models: string[];
   note: string;
   log_note: string;
-};
-
-export type VoiceCheckin = {
-  transcript: string;
-  log: {
-    weight_kg: number | null;
-    water_cups: number | null;
-    protein_servings: number | null;
-    symptoms: string[];
-    injection_today: boolean;
-    note: string;
-  };
 };
 
 async function postJson<T>(url: string, init: RequestInit): Promise<T> {
@@ -85,61 +73,4 @@ export function analyzePlate(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(after ? { before, after, lang } : { before, lang }),
   });
-}
-
-export function sendVoiceCheckin(wav: Blob, lang: "ko" | "en" = "ko") {
-  return postJson<VoiceCheckin>(`/api/voice-checkin?lang=${lang}`, {
-    method: "POST",
-    headers: { "Content-Type": "audio/wav" },
-    body: wav,
-  });
-}
-
-/** Any recording → 16 kHz mono 16-bit PCM WAV, the format Muse Voice Transcribe takes. */
-export async function toWav16k(blob: Blob): Promise<Blob> {
-  const AudioContextClass =
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext: typeof AudioContext })
-      .webkitAudioContext;
-  const context = new AudioContextClass();
-  try {
-    const decoded = await context.decodeAudioData(await blob.arrayBuffer());
-    const rate = 16000;
-    const offline = new OfflineAudioContext(
-      1,
-      Math.max(1, Math.ceil(decoded.duration * rate)),
-      rate,
-    );
-    const source = offline.createBufferSource();
-    source.buffer = decoded;
-    source.connect(offline.destination);
-    source.start();
-    const samples = (await offline.startRendering()).getChannelData(0);
-    const buffer = new ArrayBuffer(44 + samples.length * 2);
-    const view = new DataView(buffer);
-    const text = (offset: number, value: string) =>
-      [...value].forEach((ch, i) =>
-        view.setUint8(offset + i, ch.charCodeAt(0)),
-      );
-    text(0, "RIFF");
-    view.setUint32(4, 36 + samples.length * 2, true);
-    text(8, "WAVE");
-    text(12, "fmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, rate, true);
-    view.setUint32(28, rate * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    text(36, "data");
-    view.setUint32(40, samples.length * 2, true);
-    for (let i = 0; i < samples.length; i++) {
-      const s = Math.max(-1, Math.min(1, samples[i]));
-      view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-    }
-    return new Blob([buffer], { type: "audio/wav" });
-  } finally {
-    void context.close().catch(() => undefined);
-  }
 }

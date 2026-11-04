@@ -50,8 +50,12 @@ import {
   computeSchedule,
   deleteInjection,
   loadInjections,
+  loadSupply,
+  saveSupply,
+  supplyStatus,
   phaseText,
   type Injection,
+  type Supply,
 } from "./medication";
 import {
   EMPTY_PROFILE,
@@ -89,6 +93,7 @@ export default function App() {
     loadCustomMoves(),
   );
   const [reportOpen, setReportOpen] = useState(false);
+  const [supply, setSupply] = useState<Supply | null>(() => loadSupply());
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -240,6 +245,9 @@ export default function App() {
                       lang === "ko" ? MOVES[item.move].ko : MOVES[item.move].en,
                     )
                     .join(", ")}`}
+                  pensLeft={
+                    supply ? supplyStatus(supply, shots, schedule).left : null
+                  }
                   onWeight={(kg) => setLogs(upsertLog(today, { weightKg: kg }))}
                   onOpen={go}
                 />
@@ -299,6 +307,8 @@ export default function App() {
                   setLogs(upsertLog(today, { symptoms }))
                 }
                 onReport={() => setReportOpen(true)}
+                supply={supply}
+                onSupply={(next) => setSupply(saveSupply(next))}
               />
             )}
 
@@ -315,6 +325,7 @@ export default function App() {
                     clearMeals();
                     clearExercise();
                     clearCustomMoves();
+                    setSupply(saveSupply(null));
                     setCustomMoves([]);
                     setExercise([]);
                     setProfile(null);

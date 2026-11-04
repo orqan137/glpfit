@@ -34,7 +34,7 @@ Most diet apps treat every day the same and make you type in food. GLPfit asks o
 | | |
 | --- | --- |
 | **Home** | Four cards with the same shape: weight, shot cycle, protein today, exercise sets. |
-| **Shots** | Log Mounjaro / Wegovy doses. Days since the shot, next due date, site rotation, missed-dose rule from the label, today's side effects, and one chart: an **estimated relative drug-level curve** (from the label half-life) with each dose marked. |
+| **Shots** | Log Mounjaro / Wegovy doses. Days since the shot, next due date, site rotation, missed-dose rule from the label, pens left from your prescription (often four weeks at a time in Korea) and when to see your clinic, today's side effects, and one chart: an **estimated relative drug-level curve** (from the label half-life) with each dose marked. |
 | **Meals** | **Just take a photo.** Plate Lens finds every food, estimates protein and calories, and with an after photo measures what was actually eaten. Daily protein fills itself in. |
 | **Exercise** | A bodyweight routine that follows the cycle (gentle right after the shot, strength on steady days, legs when appetite returns), plus **your own exercises** with reps and sets. |
 | **Coach** | A chat agent that reads all of the above through tools, adapts to the cycle phase and remembers your patterns. Korean and English. |
@@ -48,7 +48,7 @@ Most diet apps treat every day the same and make you type in food. GLPfit asks o
 | **Muse Spark** (vision, structured output) | Plate Lens. Names foods and estimates protein, kcal and leftovers under a strict JSON schema; its estimate and SAM's geometry cross-check each other. |
 | **Muse Spark** (agent) | The coach. Calls our tools on its own and keeps multi-turn context. |
 | **Muse Spark** (structured output) | The clinician report, written from server-computed facts. |
-| **Muse Voice Transcribe** | Voice check-in API (`/api/voice-checkin`): speech → structured daily log. |
+| **Muse Voice Transcribe** | Voice check-in endpoint (`/api/voice-checkin`): speech → structured daily log, ready for a voice UI. |
 | **Muse Image** | Generated and edited the before/after sample photos in this repo. |
 
 ### The coach agent
@@ -59,7 +59,7 @@ The coach follows the workspace-file pattern of agents like OpenClaw and Hermes:
 - [`prompts/AGENTS.md`](glpfit/agent/glpfit_agent/prompts/AGENTS.md): how it works each turn, which tools to call, answer format.
 - Built per request: `TODAY` (language), `USER` (profile and where they are in the shot cycle) and `MEMORY` (facts the coach saved earlier).
 
-Tools: `get_progress` (trends computed on the server, so the model never does arithmetic), `get_medication_schedule`, `get_coaching_tips`, `analyze_meal`, and `remember`, which writes durable facts ("greasy food makes me nauseous") back into the person's memory.
+Tools: `get_progress` (trends computed on the server, so the model never does arithmetic), `get_medication_schedule`, `get_coaching_tips`, and `remember`, which writes durable facts ("greasy food makes me nauseous") back into the person's memory and skips facts it already has. `USER` also carries today's numbers, so simple questions about today need no tool call.
 
 ## Safety
 
@@ -89,6 +89,8 @@ npm run dev                 # app: http://127.0.0.1:5173   API docs: /api/docs
 
 On Windows PowerShell, `.\scripts\setup.ps1` does the install steps.
 
+**Demo data:** open `http://127.0.0.1:5173/?demo=1` to load three weeks of shots, weights and side effects (add `&lang=en` for English).
+
 **No key?** The app still runs in sample mode: shots, weight, exercise, the clinician fact table and both Plate Lens samples (with results computed earlier) work offline. Your own photos, the live coach and the written report need a key.
 
 > Keys are read on the server only, from `.env` (`MODEL_API_KEY`) or `env.txt` (`META_API_KEY`). Both are git-ignored. Never put a key in frontend code or `VITE_*` variables.
@@ -115,9 +117,9 @@ glpfit/
 
 ```bash
 cd glpfit
-uv run --locked pytest          # 52 tests
+uv run --locked pytest          # 53 tests
 uv run --locked ruff check .
-npm test                        # 27 tests
+npm test                        # 16 tests
 npm run build
 ```
 
